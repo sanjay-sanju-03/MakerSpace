@@ -27,12 +27,12 @@ export default function FormPage() {
   function onChange(e) {
     let value = e.target.value;
     
-    // Auto-format reg_no to uppercase
+    
     if (e.target.name === 'reg_no') {
       value = value.toUpperCase().replace(/\s+/g, '');
     }
     
-    // Remove spaces from phone
+    
     if (e.target.name === 'phone') {
       value = value.replace(/\s+/g, '');
     }
