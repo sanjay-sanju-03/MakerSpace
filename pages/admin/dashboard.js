@@ -76,6 +76,13 @@ export default function Dashboard() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [forceCheckoutId, setForceCheckoutId] = useState(null);
+  const [month, setMonth] = useState(() => {
+    const d = new Date();
+    const m = `${d.getMonth() + 1}`.padStart(2, '0');
+    return `${d.getFullYear()}-${m}`;
+  });
+  const [exportingMonth, setExportingMonth] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('ms_admin_token');
@@ -158,6 +165,31 @@ export default function Dashboard() {
     }
   }
 
+  async function handleExportMonthly() {
+    setExportError('');
+    setExportingMonth(true);
+    try {
+      const token = localStorage.getItem('ms_admin_token');
+      if (!token) {
+        logout();
+        return;
+      }
+      const res = await window.fetch(`/api/admin/monthly?month=${encodeURIComponent(month)}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const j = await res.json();
+      if (!res.ok) {
+        throw new Error(j.error || 'Export failed');
+      }
+      exportCSV(j.sessions || []);
+    } catch (err) {
+      console.error(err);
+      setExportError(err.message || 'Export failed');
+    } finally {
+      setExportingMonth(false);
+    }
+  }
+
   return (
     <main className="screen">
       <div className="row" style={{marginBottom:'16px'}}>
@@ -224,6 +256,26 @@ export default function Dashboard() {
                     <span className="chip">{count}</span>
                   </div>
                 ))}
+              </div>
+              <div className="card" style={{background:'#1b1f2a', gap:'12px', flexDirection:'column'}}>
+                <div className="label">Monthly export</div>
+                <div className="row" style={{gap:'8px', alignItems:'center'}}>
+                  <input
+                    type="month"
+                    className="input"
+                    value={month}
+                    onChange={(e) => setMonth(e.target.value)}
+                    style={{maxWidth:'200px'}}
+                  />
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleExportMonthly}
+                    disabled={exportingMonth}
+                  >
+                    {exportingMonth ? 'Exporting...' : 'Export CSV'}
+                  </button>
+                </div>
+                {exportError && <div className="error">{exportError}</div>}
               </div>
             </>
           )}

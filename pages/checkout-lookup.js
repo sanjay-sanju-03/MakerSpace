@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 
-const COLLEGE_COORDS = { lat: 12.5041, lng: 75.0808 };
+//const COLLEGE_COORDS = { lat: 12.5041, lng: 75.0808 }; -- LBS Cordinates
+const COLLEGE_COORDS = { lat: 12.419475130348673, lng: 75.18879145754411}; // Kodoth (For testing)
 const GEOFENCE_RADIUS_M = 100;
+
 
 function distanceMeters(a, b) {
   const toRad = (deg) => (deg * Math.PI) / 180;
