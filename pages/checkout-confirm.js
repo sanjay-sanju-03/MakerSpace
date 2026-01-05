@@ -18,7 +18,7 @@ export default function CheckoutConfirm() {
   useEffect(() => {
     const data = sessionStorage.getItem('ms_checkout_session');
     if (!data) {
-      router.push('/checkout-lookup');
+      router.push('/checkout');
       return;
     }
     setSession(JSON.parse(data));
@@ -122,7 +122,7 @@ export default function CheckoutConfirm() {
         <button onClick={confirmCheckout} className="btn btn-primary" disabled={loading}>
           {loading ? 'Processing...' : 'Confirm Check-Out'}
         </button>
-        <Link href="/checkout-lookup" className="btn btn-outline">Back</Link>
+        <Link href="/checkout" className="btn btn-outline">Back</Link>
       </div>
     </main>
   );

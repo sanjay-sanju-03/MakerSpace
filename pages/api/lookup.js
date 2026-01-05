@@ -14,15 +14,16 @@ export default async function handler(req, res) {
 
     const normalized = identifier.toString().trim().toUpperCase().replace(/\s+/g, '');
     const isRegNo = /^KSD(2[0-9])(IT|CS|CE|ME|EC|EE|CB|AI)\d{3}$/.test(normalized);
+    const isIedcId = /^IEDC[0-9A-Z]+$/.test(normalized);
     const cleanPhone = identifier.replace(/\s+/g, '');
     const isPhone = /^[6-9]\d{9}$/.test(cleanPhone);
 
-    if (!isRegNo && !isPhone) {
-      return res.status(400).json({ error: 'Invalid registration number or phone number' });
+    if (!isRegNo && !isIedcId && !isPhone) {
+      return res.status(400).json({ error: 'Invalid membership id, registration number, or phone number' });
     }
 
-    const field = isRegNo ? 'reg_no' : 'phone';
-    const value = isRegNo ? normalized : cleanPhone;
+    const field = (isRegNo || isIedcId) ? 'reg_no' : 'phone';
+    const value = (isRegNo || isIedcId) ? normalized : cleanPhone;
 
     const openQuery = await db.collection('sessions')
       .where(field, '==', value)

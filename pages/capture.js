@@ -132,7 +132,7 @@ export default function Capture() {
         >
           {loading ? 'Uploading...' : 'Capture & Submit'}
         </button>
-        <Link href="/" className="btn btn-outline">
+        <Link href="/checkin" className="btn btn-outline">
           Back
         </Link>
       </div>
