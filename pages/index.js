@@ -76,7 +76,7 @@ export default function Home() {
             <div className="field">
               <label className="label">Purpose</label>
               <select className="select" value={purpose} onChange={e => setPurpose(e.target.value)} required>
-                <option value="">Select purpose</option>
+                <option value="" disabled>Select purpose</option>
                 <option value="Project Work">Project Work</option>
                 <option value="Workshop">Workshop</option>
                 <option value="Event">Event</option>

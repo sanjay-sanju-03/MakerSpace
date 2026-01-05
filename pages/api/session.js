@@ -7,7 +7,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const PURPOSES = ['Work', 'Project', 'Maintenance', 'Visit'];
+const PURPOSES = ['Project Work', 'Workshop', 'Event', 'Mentoring', 'Other', 'IEDC'];
 const BRANCHES = ['IT', 'CS', 'CE', 'ME', 'EC', 'EE', 'CB', 'AI'];
 
 function normalizeRegNo(raw) {
