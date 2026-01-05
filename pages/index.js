@@ -15,7 +15,7 @@ export default function Home() {
     setLoading(true);
     try {
       const cleanId = id.trim().toUpperCase();
-      const resp = await fetch(`https://iedclbscekapi.vercel.app/api/users/member?id=${encodeURIComponent(cleanId)}`);
+      const resp = await fetch(`/api/iedc-member?id=${encodeURIComponent(cleanId)}`);
       const data = await resp.json();
       if (!resp.ok || !data || data.success !== true || !data.data) {
         window.location.href = 'https://www.iedclbscek.in/register';
