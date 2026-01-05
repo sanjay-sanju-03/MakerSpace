@@ -6,6 +6,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [user, setUser] = useState(null);
+  const [purpose, setPurpose] = useState('');
   const router = useRouter();
 
   async function handleSubmit(e) {
@@ -22,6 +23,7 @@ export default function Home() {
         return;
       }
       setUser(data.data);
+      setPurpose('');
     } catch (e) {
       setErr('Could not verify membership. Try again.');
     }
@@ -29,8 +31,12 @@ export default function Home() {
   }
 
   function proceed() {
+    if (!purpose) {
+      setErr('Purpose is required');
+      return;
+    }
     // Save user details for next step
-    sessionStorage.setItem('iedc_user', JSON.stringify(user));
+    sessionStorage.setItem('iedc_user', JSON.stringify({ ...user, purpose }));
     router.push('/capture');
   }
 
@@ -67,6 +73,17 @@ export default function Home() {
             <div><b>Admission No:</b> {user.admissionNo}</div>
             <div><b>Year of Admission:</b> {user.yearOfJoining}</div>
             <div><b>Department:</b> {user.department}</div>
+            <div className="field">
+              <label className="label">Purpose</label>
+              <select className="select" value={purpose} onChange={e => setPurpose(e.target.value)} required>
+                <option value="">Select purpose</option>
+                <option value="Project Work">Project Work</option>
+                <option value="Workshop">Workshop</option>
+                <option value="Event">Event</option>
+                <option value="Mentoring">Mentoring</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
             <button className="btn btn-primary" onClick={proceed}>Proceed to Photo Capture</button>
           </div>
         )}

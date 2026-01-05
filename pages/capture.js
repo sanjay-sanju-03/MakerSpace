@@ -74,7 +74,7 @@ export default function Capture() {
           phone: '',
           department: user.department || '',
           year: user.yearOfJoining || '',
-          purpose: 'IEDC',
+          purpose: user.purpose || 'IEDC',
           photo_base64: imageDataUrl,
         }),
       });
