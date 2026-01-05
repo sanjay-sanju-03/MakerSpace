@@ -1,6 +1,5 @@
 const { getDb, admin } = require('../../lib/firebaseAdmin');
 const cloudinary = require('cloudinary').v2;
-const sharp = require('sharp');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -25,24 +24,8 @@ function validatePhone(phone) {
   return regex.test(phone);
 }
 
-async function compressImage(base64) {
-  // Remove data URI prefix if present
-  const matches = base64.match(/^data:(image\/\w+);base64,(.+)$/);
-  const data = matches ? matches[2] : base64;
-  const buffer = Buffer.from(data, 'base64');
-
-  // Compress: reduce to 80% quality, max 1280px width, optimize
-  const compressed = await sharp(buffer)
-    .resize(1280, 960, { fit: 'inside', withoutEnlargement: true })
-    .jpeg({ quality: 80, progressive: true })
-    .toBuffer();
-
-  return 'data:image/jpeg;base64,' + compressed.toString('base64');
-}
-
 async function uploadPhoto(base64, regNo) {
-  const compressedBase64 = await compressImage(base64);
-  const result = await cloudinary.uploader.upload(compressedBase64, {
+  const result = await cloudinary.uploader.upload(base64, {
     folder: 'makerspace/sessions',
     public_id: `${regNo}_${Date.now()}`,
     resource_type: 'image',
