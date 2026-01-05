@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 const PURPOSES = [ 'Work', 'Project', 'Maintenance', 'Visit' ];
 const BRANCHES = ['IT', 'CS', 'CE', 'ME', 'EC', 'EE', 'CB', 'AI'];
-//const COLLEGE_COORDS = { lat: 12.5041, lng: 75.0808 }; //LBS Cordinates
-const COLLEGE_COORDS = { lat: 12.419475130348673, lng: 75.18879145754411}; // Kodoth (For testing)
+const COLLEGE_COORDS = { lat: 12.5041, lng: 75.0808 }; //LBS Cordinates
+//const COLLEGE_COORDS = { lat: 12.419475130348673, lng: 75.18879145754411}; // Kodoth (For testing)
 const GEOFENCE_RADIUS_M = 100;
 
 function distanceMeters(a, b) {
