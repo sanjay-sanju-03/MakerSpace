@@ -2,11 +2,14 @@
   "name": "makerspace_qr",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "vercel-build": "next build"
+    "vercel-build": "npm rebuild sharp --platform=linux --arch=x64 && next build"
   },
   "dependencies": {
     "cloudinary": "^2.8.0",
