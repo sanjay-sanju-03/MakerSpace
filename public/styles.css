@@ -263,17 +263,53 @@ small {
 }
 
 button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Loading animation */
+@keyframes loading-slide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+
+/* Info rows in cards */
+.card .row,
+.card > div {
+    font-size: 0.95rem;
+}
+
+.card b {
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Select styling */
+.select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+    padding-right: 44px;
 }
 
 /* Responsive */
 @media (max-width: 480px) {
-    .screen { padding: 16px 12px 80px; }
-    .title { font-size: 1.4rem; }
+    .screen { padding: 20px 16px 120px; }
+    .title { font-size: 1.5rem; }
     .grid2 { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+    .footer-actions { padding: 16px 16px 20px; }
 }
 
 @media (min-width: 680px) { 
-    .screen { max-width: 640px; } 
+    .screen { max-width: 520px; } 
+}
+
+/* Image in cards */
+.card img {
+    border-radius: 12px;
+    box-shadow: var(--shadow);
 }

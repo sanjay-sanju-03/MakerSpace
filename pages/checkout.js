@@ -58,6 +58,28 @@ export default function Checkout() {
           />
         </div>
 
+        {loading && (
+          <div style={{ marginTop: '8px' }}>
+            <div style={{ 
+              width: '100%', 
+              height: '4px', 
+              background: 'var(--border)', 
+              borderRadius: '999px', 
+              overflow: 'hidden' 
+            }}>
+              <div style={{ 
+                width: '100%', 
+                height: '100%', 
+                background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%)',
+                animation: 'loading-slide 1.5s ease-in-out infinite'
+              }} />
+            </div>
+            <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem', marginTop: '8px' }}>
+              Finding your check-in...
+            </p>
+          </div>
+        )}
+
         {err && <div className="error">{err}</div>}
 
         <div className="footer-actions">
