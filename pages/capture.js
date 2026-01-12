@@ -70,6 +70,9 @@ export default function Capture() {
         return;
       }
 
+      const role = (user.role || 'student').toLowerCase();
+      const userType = role === 'student' ? 'student' : 'student';
+
       const v = videoRef.current;
       const c = canvasRef.current;
       
@@ -112,7 +115,8 @@ export default function Capture() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'checkin',
-          user_type: 'student',
+          user_type: userType,
+          role,
           name: `${user.firstName} ${user.lastName || ''}`.trim(),
           reg_no: user.membershipId,
           phone: '',

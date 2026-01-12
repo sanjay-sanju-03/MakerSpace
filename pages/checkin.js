@@ -10,6 +10,11 @@ export default function CheckIn() {
   const [purpose, setPurpose] = useState('');
   const router = useRouter();
 
+  const role = (() => {
+    const val = (router.query.role || 'student').toString().toLowerCase();
+    return ['student', 'staff', 'guest'].includes(val) ? val : 'student';
+  })();
+
   async function handleSubmit(e) {
     e.preventDefault();
     setErr('');
@@ -40,7 +45,7 @@ export default function CheckIn() {
       setErr('Purpose is required');
       return;
     }
-    sessionStorage.setItem('iedc_user', JSON.stringify({ ...user, purpose }));
+    sessionStorage.setItem('iedc_user', JSON.stringify({ ...user, purpose, role }));
     router.push('/capture');
   }
 
@@ -50,6 +55,10 @@ export default function CheckIn() {
         <div>
           <div className="title">IEDC Makerspace Check-In</div>
           <div className="subtitle">Enter your IEDC Membership ID to continue</div>
+          <div style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderRadius: '999px', background: 'var(--surface-2)', color: 'var(--text)' }}>
+            <span style={{ fontWeight: 600, textTransform: 'capitalize' }}>{role}</span>
+            <Link href="/checkin-role" style={{ color: 'var(--primary)', fontSize: '0.9rem', fontWeight: 600 }}>Change</Link>
+          </div>
         </div>
 
         <form className="card stack" onSubmit={handleSubmit}>
@@ -96,7 +105,7 @@ export default function CheckIn() {
 
           {!user && (
             <>
-              <Link href="/" className="btn btn-outline">Back</Link>
+              <Link href="/checkin-role" className="btn btn-outline">Back</Link>
               <div style={{ textAlign: 'center', marginTop: '8px' }}>
                 <a 
                   href="https://www.iedclbscek.in/register" 
@@ -136,7 +145,7 @@ export default function CheckIn() {
 
             <div className="footer-actions">
               <button className="btn btn-primary" onClick={proceed} disabled={!purpose}>Proceed to Photo Capture</button>
-              <Link href="/" className="btn btn-outline">Cancel</Link>
+              <Link href="/checkin-role" className="btn btn-outline">Cancel</Link>
             </div>
           </div>
         )}

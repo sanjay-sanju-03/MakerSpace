@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
     // CHECK-IN
     if (action === 'checkin') {
-      const { user_type, name, reg_no, phone, department, year, purpose, photo_base64 } = req.body;
+      const { user_type, role, name, reg_no, phone, department, year, purpose, photo_base64 } = req.body;
 
       if (!user_type || !['student', 'staff'].includes(user_type)) {
         return res.status(400).json({ error: 'Invalid user_type' });
@@ -94,6 +94,7 @@ export default async function handler(req, res) {
 
       const sessionData = {
         user_type,
+        role: role || user_type,
         name,
         purpose,
         check_in_time: admin.firestore.FieldValue.serverTimestamp(),

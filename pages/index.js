@@ -9,7 +9,7 @@ export default function Home() {
           <div className="subtitle">Choose an action to continue</div>
         </div>
         <div className="card stack">
-          <Link href="/checkin" className="btn btn-primary">Check-In</Link>
+          <Link href="/checkin-role" className="btn btn-primary">Check-In</Link>
           <Link href="/checkout" className="btn btn-outline">Check-Out</Link>
         </div>
       </div>
