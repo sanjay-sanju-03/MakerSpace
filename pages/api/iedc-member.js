@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   try {
     const upstream = await fetch(
-      `https://iedclbscekapi.vercel.app/api/users/member?id=${encodeURIComponent(id)}`,
+      `https://api.iedclbscek.in/api/public/member?id=${encodeURIComponent(id)}`,
       { cache: 'no-store' }
     );
 
