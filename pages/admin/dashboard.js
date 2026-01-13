@@ -46,13 +46,14 @@ function timeSince(ts) {
 }
 
 function exportCSV(sessions) {
-  const headers = ['Name', 'Type', 'Reg No', 'Phone', 'Department', 'Year', 'Purpose', 'Check-In', 'Check-Out', 'Duration (min)', 'Status'];
+  const headers = ['Name', 'User Type', 'Membership ID', 'Email', 'Department', 'Organization', 'Year', 'Purpose', 'Check-In', 'Check-Out', 'Duration (min)', 'Status'];
   const rows = sessions.map(s => [
     s.name || '',
     s.user_type || '',
     s.reg_no || '',
-    s.phone || '',
+    s.email || '',
     s.department || '',
+    s.organization || '',
     s.year || '',
     s.purpose || '',
     s.check_in_time ? new Date(s.check_in_time).toISOString() : '',
@@ -60,7 +61,7 @@ function exportCSV(sessions) {
     s.duration_minutes || '',
     s.status || ''
   ]);
-  
+
   const csv = [headers, ...rows].map(row => row.map(v => `"${v}"`).join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
@@ -118,6 +119,8 @@ export default function Dashboard() {
       filtered = filtered.filter(s =>
         (s.name || '').toLowerCase().includes(q) ||
         (s.reg_no || '').toLowerCase().includes(q) ||
+        (s.email || '').toLowerCase().includes(q) ||
+        (s.organization || '').toLowerCase().includes(q) ||
         (s.phone || '').includes(q)
       );
     }
@@ -238,7 +241,7 @@ export default function Dashboard() {
                 <span className="label">Currently Active</span>
                 <strong style={{fontSize:'1.5rem',color:'var(--accent)'}}>{stats.data.stats.active_users}</strong>
               </div>
-              <div className="grid2">
+              <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:'12px'}}>
                 <div className="card" style={{background:'#1b1f2a'}}>
                   <div className="label">Students</div>
                   <strong style={{fontSize:'1.2rem'}}>{stats.data.stats.students}</strong>
@@ -246,6 +249,10 @@ export default function Dashboard() {
                 <div className="card" style={{background:'#1b1f2a'}}>
                   <div className="label">Staff</div>
                   <strong style={{fontSize:'1.2rem'}}>{stats.data.stats.staff}</strong>
+                </div>
+                <div className="card" style={{background:'#1b1f2a'}}>
+                  <div className="label">Guests</div>
+                  <strong style={{fontSize:'1.2rem'}}>{stats.data.stats.guests}</strong>
                 </div>
               </div>
               <div>
@@ -286,7 +293,7 @@ export default function Dashboard() {
           <div className="card" style={{display:'flex',gap:'12px',flexDirection:'column'}}>
             <input 
               className="input"
-              placeholder="Search by name, reg no, or phone..."
+              placeholder="Search by name, membership ID, email, or org..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -312,6 +319,13 @@ export default function Dashboard() {
               >
                 Staff
               </button>
+              <button 
+                className={`btn ${filter === 'guest' ? 'btn-primary' : 'btn-outline'}`}
+                onClick={() => setFilter('guest')}
+                style={{flex:1}}
+              >
+                Guests
+              </button>
             </div>
             {tab === 'today' && filtered.length > 0 && (
               <button 
@@ -334,58 +348,79 @@ export default function Dashboard() {
           )}
           
           <div className="list">
-            {filtered.map(s => (
-              <div key={s.id} className="card stack">
-                <div className="row">
-                  <strong>{s.name}</strong>
-                  <span className="chip">{s.purpose}</span>
-                </div>
-                <div className="row">
-                  <span className="muted">{s.user_type === 'student' ? 'Student' : 'Staff'}</span>
-                  <span>{s.user_type === 'student' ? s.reg_no : s.phone}</span>
-                </div>
-                {s.user_type === 'student' && s.department && (
+            {filtered.map(s => {
+              const typeLabel = s.user_type === 'staff' ? 'Staff' : s.user_type === 'guest' ? 'Guest' : 'Student';
+              return (
+                <div key={s.id} className="card stack">
                   <div className="row">
-                    <span className="muted">Dept</span>
-                    <span>{s.department} {s.year ? `- Year ${s.year}` : ''}</span>
+                    <strong>{s.name}</strong>
+                    <span className="chip">{s.purpose}</span>
                   </div>
-                )}
-                <div className="row">
-                  <span className="muted">Check-In</span>
-                  <span>{formatTime(s.check_in_time)}</span>
-                </div>
-                {s.status === 'closed' && (
-                  <>
-                    <div className="row">
-                      <span className="muted">Check-Out</span>
-                      <span>{formatTime(s.check_out_time)}</span>
-                    </div>
-                    <div className="row">
-                      <span className="muted">Duration</span>
-                      <strong>{formatDuration(s.duration_minutes)}</strong>
-                    </div>
-                  </>
-                )}
-                {s.status === 'open' && (
                   <div className="row">
-                    <span className="muted">Elapsed</span>
-                    <strong style={{color:'var(--accent)'}}>{timeSince(s.check_in_time)}</strong>
+                    <span className="muted">{typeLabel}</span>
+                    <span>{s.reg_no || '—'}</span>
                   </div>
-                )}
-                {tab === 'live' && s.status === 'open' && (
-                  <div className="row" style={{justifyContent:'flex-end'}}>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => handleForceCheckout(s.id)}
-                      disabled={forceCheckoutId === s.id}
-                      style={{width:'auto'}}
-                    >
-                      {forceCheckoutId === s.id ? 'Checking out...' : 'Force check-out'}
-                    </button>
+                  {s.email && (
+                    <div className="row">
+                      <span className="muted">Email</span>
+                      <span>{s.email}</span>
+                    </div>
+                  )}
+                  {s.user_type === 'student' && (s.department || s.year) && (
+                    <div className="row">
+                      <span className="muted">Dept</span>
+                      <span>{s.department || '—'} {s.year ? `- Year ${s.year}` : ''}</span>
+                    </div>
+                  )}
+                  {s.user_type === 'staff' && s.department && (
+                    <div className="row">
+                      <span className="muted">Department</span>
+                      <span>{s.department}</span>
+                    </div>
+                  )}
+                  {s.user_type === 'guest' && s.organization && (
+                    <div className="row">
+                      <span className="muted">Organization</span>
+                      <span>{s.organization}</span>
+                    </div>
+                  )}
+                  <div className="row">
+                    <span className="muted">Check-In</span>
+                    <span>{formatTime(s.check_in_time)}</span>
                   </div>
-                )}
-              </div>
-            ))}
+                  {s.status === 'closed' && (
+                    <>
+                      <div className="row">
+                        <span className="muted">Check-Out</span>
+                        <span>{formatTime(s.check_out_time)}</span>
+                      </div>
+                      <div className="row">
+                        <span className="muted">Duration</span>
+                        <strong>{formatDuration(s.duration_minutes)}</strong>
+                      </div>
+                    </>
+                  )}
+                  {s.status === 'open' && (
+                    <div className="row">
+                      <span className="muted">Elapsed</span>
+                      <strong style={{color:'var(--accent)'}}>{timeSince(s.check_in_time)}</strong>
+                    </div>
+                  )}
+                  {tab === 'live' && s.status === 'open' && (
+                    <div className="row" style={{justifyContent:'flex-end'}}>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => handleForceCheckout(s.id)}
+                        disabled={forceCheckoutId === s.id}
+                        style={{width:'auto'}}
+                      >
+                        {forceCheckoutId === s.id ? 'Checking out...' : 'Force check-out'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </>
       )}

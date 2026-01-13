@@ -121,6 +121,7 @@ export default function Capture() {
           reg_no: user.membershipId,
           phone: '',
           department: user.department || '',
+          organization: user.organization || '',
           year: user.yearOfJoining || '',
           purpose: user.purpose || 'IEDC',
           email: user.email || '',

@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
     // CHECK-IN
     if (action === 'checkin') {
-      const { user_type, role, name, reg_no, phone, email, department, year, purpose, photo_base64 } = req.body;
+      const { user_type, role, name, reg_no, phone, email, department, year, organization, purpose, photo_base64 } = req.body;
 
       if (!user_type || !['student', 'staff', 'guest'].includes(user_type)) {
         return res.status(400).json({ error: 'Invalid user_type' });
@@ -112,10 +112,12 @@ export default async function handler(req, res) {
         sessionData.department = department || null;
         sessionData.year = year || null;
         sessionData.phone = null;
+        sessionData.organization = null;
       } else {
         sessionData.reg_no = identifier;
-        sessionData.department = department || null;
-        sessionData.year = year || null;
+        sessionData.department = user_type === 'staff' ? (department || null) : null;
+        sessionData.organization = user_type === 'guest' ? (organization || null) : null;
+        sessionData.year = null;
         sessionData.phone = null;
       }
 

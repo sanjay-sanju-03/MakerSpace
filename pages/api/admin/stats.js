@@ -35,6 +35,7 @@ export default async function handler(req, res) {
       active_users: sessions.filter(s => s.status === 'open').length,
       students: sessions.filter(s => s.user_type === 'student').length,
       staff: sessions.filter(s => s.user_type === 'staff').length,
+      guests: sessions.filter(s => s.user_type === 'guest').length,
       by_purpose: {}
     };
 
