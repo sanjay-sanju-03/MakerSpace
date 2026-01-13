@@ -228,8 +228,9 @@ export default function CheckIn() {
       };
       setUser(newUser);
       setErr('');
-      // Redirect back to role-specific login/check-in page
+      // Redirect back to role-specific login/check-in page only on success
       router.push(`/checkin?role=${role}`);
+      return;
     } catch (e) {
       setErr('Registration failed. Try again.');
     }
