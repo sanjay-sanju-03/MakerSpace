@@ -6,6 +6,7 @@ import * as faceapi from 'face-api.js';
 export default function Capture() {
   const videoRef = useRef();
   const canvasRef = useRef();
+  const streamRef = useRef(null);
   const router = useRouter();
   const [err, setErr] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,7 @@ export default function Capture() {
           },
           audio: false,
         });
+        streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setCameraReady(true);
@@ -38,8 +40,9 @@ export default function Capture() {
     };
     start();
     return () => {
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(t => t.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
       }
     };
   }, []);
@@ -139,6 +142,10 @@ export default function Capture() {
 
       // Success
       sessionStorage.removeItem('iedc_user');
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
       router.push(`/success?id=${json.id}`);
     } catch (e) {
       setErr(e.message || 'An error occurred');
