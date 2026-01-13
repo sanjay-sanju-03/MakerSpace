@@ -18,6 +18,30 @@ export default function CheckIn() {
   const [registering, setRegistering] = useState(false);
   const router = useRouter();
 
+  const LoadingBar = ({ label }) => (
+    <div style={{ width: '100%' }}>
+      <div style={{ 
+        width: '100%', 
+        height: '4px', 
+        background: 'var(--border-soft)', 
+        borderRadius: '999px', 
+        overflow: 'hidden' 
+      }}>
+        <div style={{ 
+          width: '100%', 
+          height: '100%', 
+          background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%)',
+          animation: 'loading-slide 1.5s ease-in-out infinite'
+        }} />
+      </div>
+      {label && (
+        <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem', marginTop: '8px' }}>
+          {label}
+        </p>
+      )}
+    </div>
+  );
+
   const role = (() => {
     const val = (router.query.role || 'student').toString().toLowerCase();
     return ['student', 'staff', 'guest'].includes(val) ? val : 'student';
@@ -310,23 +334,7 @@ export default function CheckIn() {
 
             {loading && (
               <div style={{ marginTop: '8px' }}>
-                <div style={{ 
-                  width: '100%', 
-                  height: '4px', 
-                  background: 'var(--border)', 
-                  borderRadius: '999px', 
-                  overflow: 'hidden' 
-                }}>
-                  <div style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    background: 'linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%)',
-                    animation: 'loading-slide 1.5s ease-in-out infinite'
-                  }} />
-                </div>
-                <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: '0.875rem', marginTop: '8px' }}>
-                  Verifying membership...
-                </p>
+                <LoadingBar label="Verifying membership..." />
               </div>
             )}
 
@@ -424,6 +432,9 @@ export default function CheckIn() {
                 {registering ? 'Verifying...' : 'Verify OTP'}
               </button>
             </div>
+            {(otpSending || registering) && (
+              <LoadingBar label={otpSending ? 'Sending OTP...' : otpVerified ? 'Submitting registration...' : 'Verifying OTP...'} />
+            )}
             {otpSent && !registering && (
               <small style={{ color: otpVerified ? 'var(--primary)' : 'var(--muted)', fontWeight: 600 }}>
                 {otpVerified ? 'OTP verified ✓' : 'OTP sent. Enter and verify.'}
