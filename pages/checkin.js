@@ -383,7 +383,7 @@ export default function CheckIn() {
             </div>
             {role === 'staff' && (
               <div className="field">
-                <label className="label">Department (optional)</label>
+                <label className="label">Department</label>
                 <input className="input" value={form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
               </div>
             )}
@@ -479,13 +479,13 @@ export default function CheckIn() {
                 </div>
                 {role === 'staff' && (
                   <div className="field">
-                    <label className="label">Department (optional)</label>
+                    <label className="label">Department </label>
                     <input className="input" value={user.department || form.department} onChange={e => setForm({ ...form, department: e.target.value })} />
                   </div>
                 )}
                 {role === 'guest' && (
                   <div className="field">
-                    <label className="label">Organization (required for guests)</label>
+                    <label className="label">Organization</label>
                     <input className="input" value={user.organization || form.organization} onChange={e => setForm({ ...form, organization: e.target.value })} />
                   </div>
                 )}
