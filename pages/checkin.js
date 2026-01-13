@@ -24,7 +24,11 @@ export default function CheckIn() {
   })();
 
   const isStudent = role === 'student';
-  const idPlaceholder = isStudent ? 'IEDC Membership ID (e.g., IEDC28CS029)' : 'IEDC Staff/Guest ID (e.g., IEDC26ST005)';
+  const idPlaceholder = isStudent
+    ? 'IEDC Membership ID (e.g., IEDC28CS029)'
+    : role === 'staff'
+      ? 'IEDC Staff ID (e.g., IEDC26ST005)'
+      : 'IEDC Guest ID';
 
   async function handleSubmit(e) {
     e.preventDefault();
