@@ -81,8 +81,7 @@ export default function CheckIn() {
         }
         const member = { ...data.data, membershipId: data.data.membershipId || cleanId, userType: 'student' };
         setUser(member);
-        // send OTP to membershipId (server will map to email) and require verification
-        await sendOtp(member.membershipId);
+        // Show details first; send OTP only when user clicks "Send OTP"
         setStage('otp');
         setPurpose('');
       } else {
