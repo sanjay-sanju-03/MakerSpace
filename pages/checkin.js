@@ -8,7 +8,7 @@ export default function CheckIn() {
   const [err, setErr] = useState('');
   const [user, setUser] = useState(null);
   const [purpose, setPurpose] = useState('');
-  const [stage, setStage] = useState('lookup'); // lookup | register | verified
+  const [stage, setStage] = useState('lookup'); // lookup | otp | register | verified
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', department: '', organization: '' });
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
@@ -79,8 +79,11 @@ export default function CheckIn() {
           window.location.href = 'https://www.iedclbscek.in/register';
           return;
         }
-        setUser({ ...data.data, membershipId: data.data.membershipId || cleanId, userType: 'student' });
-        setStage('verified');
+        const member = { ...data.data, membershipId: data.data.membershipId || cleanId, userType: 'student' };
+        setUser(member);
+        // send OTP to membershipId (server will map to email) and require verification
+        await sendOtp(member.membershipId);
+        setStage('otp');
         setPurpose('');
       } else {
         const verifyResp = await fetch(`/api/iedc/verify-member?id=${encodeURIComponent(cleanId)}`);
@@ -130,20 +133,30 @@ export default function CheckIn() {
     setStage('register');
   }
 
-  async function sendOtp() {
+  async function sendOtp(identifier) {
     setErr('');
     setOtpVerified(false);
     setOtpToken('');
-    if (!form.email.trim()) {
-      setErr('Email is required to send OTP');
+    const payload = {};
+    // identifier can be email or membershipId; fallback to form.email or user.membershipId
+    if (identifier) {
+      if (typeof identifier === 'string' && identifier.toUpperCase().startsWith('IEDC')) payload.membershipId = identifier.trim();
+      else payload.email = identifier.trim();
+    } else if (form.email && form.email.trim()) {
+      payload.email = form.email.trim();
+    } else if (user?.membershipId) {
+      payload.membershipId = user.membershipId;
+    } else {
+      setErr('Email or membership ID is required to send OTP');
       return;
     }
+
     setOtpSending(true);
     try {
       const resp = await fetch('/api/iedc/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email.trim() }),
+        body: JSON.stringify(payload),
       });
       const data = await resp.json();
       if (!resp.ok || !data?.success) {
@@ -160,20 +173,27 @@ export default function CheckIn() {
 
   async function verifyOtp() {
     setErr('');
-    if (!form.email.trim()) {
-      setErr('Email is required');
-      return;
-    }
     if (!otp.trim()) {
-      setErr('Enter the OTP sent to your email');
+      setErr('Enter the OTP');
       return;
     }
     setRegistering(true);
     try {
+      const payload = { otp: otp.trim() };
+      // For membership lookup flow, we always verify by membershipId.
+      if (stage === 'otp' && user?.membershipId) payload.membershipId = user.membershipId;
+      else if (form.email && form.email.trim()) payload.email = form.email.trim();
+      else if (user?.membershipId) payload.membershipId = user.membershipId;
+      else {
+        setErr('Email or membership ID is required to verify OTP');
+        setRegistering(false);
+        return;
+      }
+
       const resp = await fetch('/api/iedc/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email.trim(), otp: otp.trim() }),
+        body: JSON.stringify(payload),
       });
       const data = await resp.json();
       if (!resp.ok || !data?.success) {
@@ -184,6 +204,8 @@ export default function CheckIn() {
       setOtpVerified(true);
       setOtpToken(data?.otpToken || '');
       setErr('');
+      // if we were verifying for a looked-up member, move to verified stage
+      if (stage === 'otp') setStage('verified');
     } catch (e) {
       setErr('Failed to verify OTP. Try again.');
     }
@@ -302,6 +324,8 @@ export default function CheckIn() {
     setErr('');
     setOtp('');
     setOtpSent(false);
+    setOtpVerified(false);
+    setOtpToken('');
   }
 
   const showPurpose = stage === 'verified' && user;
@@ -427,7 +451,7 @@ export default function CheckIn() {
                 type="button"
                 className="btn btn-primary"
                 onClick={verifyOtp}
-                disabled={registering || !otp.trim() || !form.email.trim()}
+                disabled={registering || !otp.trim() || !(form.email.trim() || user?.membershipId)}
               >
                 {registering ? 'Verifying...' : 'Verify OTP'}
               </button>
@@ -451,6 +475,52 @@ export default function CheckIn() {
             </button>
 
             {err && <div className="error">{err}</div>}
+
+            <div className="footer-actions">
+              <Link href="/checkin-role" className="btn btn-outline">Cancel</Link>
+            </div>
+          </div>
+        )}
+
+        {stage === 'otp' && (
+          <div className="card stack">
+            <div className="subtitle">Verify your ID</div>
+            <div>
+              <div><b>Name:</b> {(user?.firstName || '').trim() || '—'} {(user?.lastName || '').trim()}</div>
+              <div><b>Membership ID:</b> {user?.membershipId}</div>
+              {isStudent && (
+                <>
+                  <div><b>Admission No:</b> {user?.admissionNo || '—'}</div>
+                  <div><b>Year of Admission:</b> {user?.yearOfJoining || '—'}</div>
+                </>
+              )}
+              <div className="muted" style={{ marginTop: 6 }}>
+                OTP was sent to your registered email. Enter and verify it.
+              </div>
+            </div>
+
+            <div style={{ marginTop: 8 }}>
+              <button type="button" className="btn btn-outline" onClick={() => sendOtp()} disabled={otpSending}>
+                {otpSending ? 'Sending...' : otpSent ? 'Resend OTP' : 'Send OTP'}
+              </button>
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <div className="row" style={{ gap: '10px' }}>
+                <input className="input" placeholder="Enter OTP" value={otp} onChange={e => { setOtp(e.target.value); setOtpVerified(false); }} maxLength={6} />
+                <button type="button" className="btn btn-primary" onClick={verifyOtp} disabled={registering || !otp.trim()}>
+                  {registering ? 'Verifying...' : 'Verify OTP'}
+                </button>
+              </div>
+              {(otpSending || registering) && (
+                <LoadingBar label={otpSending ? 'Sending OTP...' : 'Verifying OTP...'} />
+              )}
+              {otpSent && !registering && (
+                <small style={{ color: otpVerified ? 'var(--primary)' : 'var(--muted)', fontWeight: 600 }}>
+                  {otpVerified ? 'OTP verified ✓' : 'OTP sent. Enter and verify.'}
+                </small>
+              )}
+            </div>
 
             <div className="footer-actions">
               <Link href="/checkin-role" className="btn btn-outline">Cancel</Link>
